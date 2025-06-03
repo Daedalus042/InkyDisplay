@@ -33,8 +33,6 @@ class WeatherManagerClass:
     COUNTRYCODE = Secrets.countrycode
     WARNING_TEMP = 25.0
 
-    display = None
-
     def __init__(self, display):
         self.display = display
 
@@ -62,7 +60,7 @@ class WeatherManagerClass:
             return weather
 
 
-    def create_mask(self, source, mask=(display.WHITE, display.BLACK, display.RED)):
+    def create_mask(self, source):
         """Create a transparency mask.
 
         Takes a paletized source image and converts it into a mask
@@ -72,6 +70,7 @@ class WeatherManagerClass:
         :param mask: Optional list of Inky pHAT colours to allow.
 
         """
+        mask=(self.display.WHITE, self.display.BLACK, self.display.RED)
         mask_image = Image.new("1", source.size)
         w, h = source.size
         for x in range(w):
@@ -122,7 +121,7 @@ class WeatherManagerClass:
             print("Warning, no weather information found!")
 
         # Create a new canvas to draw on
-        img = Image.open(os.path.join(PATH, "resources/Background_250x122.png")).resize(display.resolution)
+        img = Image.open(os.path.join(PATH, "resources/Background_250x122.png")).resize(self.display.resolution)
         draw = ImageDraw.Draw(img)
 
         # Load our icon files and generate masks
