@@ -155,7 +155,7 @@ def doWeatherUpdate():
 
     # Draw lines to frame the weather data
     draw.line((75, 41, 75, 100))       # Vertical line
-    draw.line((31, 41, 222, 41))      # Horizontal top line
+    draw.line((27, 41, 222, 41))      # Horizontal top line
     draw.line((75, 70, 222, 70))      # Horizontal middle line
     draw.line((207, 70, 207, 70), 2)  # Red seaweed pixel :D
 
@@ -172,10 +172,10 @@ def doWeatherUpdate():
 
     # Draw the current weather icon over the backdrop
     if weather_icon is not None:
-        img.paste(icons[weather_icon], (35, 50), masks[weather_icon])
+        img.paste(icons[weather_icon], (30, 50), masks[weather_icon])
 
     else:
-        draw.text((35, 50), "?", display.RED, font=font)
+        draw.text((30, 50), "?", display.RED, font=font)
 
     # Display the weather data on Inky pHAT
     display.set_image(img)
