@@ -21,3 +21,7 @@ Clone to the same directory as an inky repository clone such that the file struc
     ├── InkyDisplay
     │   └── <this repository files>
     └── <Directory continues>
+
+## Acknowledgements
+
+Some assets and code provided by the Pimoroni inky Github.
