@@ -164,18 +164,18 @@ def doWeatherUpdate():
 
     draw.text((41, 14), datetime, display.WHITE, font=font)
 
-    draw.text((80, 40), "T", display.WHITE, font=font)
-    draw.text((100, 40), "{}°C".format(temperature), display.WHITE if temperature < WARNING_TEMP else display.RED, font=font)
+    draw.text((83, 43), "T", display.WHITE, font=font)
+    draw.text((103, 43), "{}°C".format(temperature), display.WHITE if temperature < WARNING_TEMP else display.RED, font=font)
 
-    draw.text((80, 69), "W", display.WHITE, font=font)
-    draw.text((100, 69), "{}kmh".format(windspeed), display.WHITE, font=font)
+    draw.text((80, 72), "W", display.WHITE, font=font)
+    draw.text((103, 72), "{}kmh".format(windspeed), display.WHITE, font=font)
 
     # Draw the current weather icon over the backdrop
     if weather_icon is not None:
-        img.paste(icons[weather_icon], (30, 50), masks[weather_icon])
+        img.paste(icons[weather_icon], (30, 45), masks[weather_icon])
 
     else:
-        draw.text((30, 50), "?", display.RED, font=font)
+        draw.text((30, 45), "?", display.RED, font=font)
 
     # Display the weather data on Inky pHAT
     display.set_image(img)
