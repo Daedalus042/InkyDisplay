@@ -140,7 +140,7 @@ def doWeatherUpdate():
         print("Warning, no weather information found!")
 
     # Create a new canvas to draw on
-    img = Image.open(os.path.join(PATH, "resources/background_250x122.png")).resize(display.resolution)
+    img = Image.open(os.path.join(PATH, "resources/Background_250x122.png")).resize(display.resolution)
     draw = ImageDraw.Draw(img)
 
     # Load our icon files and generate masks
@@ -155,7 +155,7 @@ def doWeatherUpdate():
 
     # Draw lines to frame the weather data
     draw.line((75, 41, 75, 100))       # Vertical line
-    draw.line((31, 41, 222, 35))      # Horizontal top line
+    draw.line((31, 41, 222, 41))      # Horizontal top line
     draw.line((75, 70, 222, 70))      # Horizontal middle line
     draw.line((207, 70, 207, 70), 2)  # Red seaweed pixel :D
 
