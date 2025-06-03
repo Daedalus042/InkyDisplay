@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 from font_fredoka_one import FredokaOne
 from inky import eeprom
 from inky import phat
-from weather import WeatherManager
+from weather import WeatherManagerClass
 
 # Import secrets
 from secrets import Secrets
@@ -28,6 +28,7 @@ elif _eeprom.display_variant != 11:
     raise RuntimeError("Display is not the expected variant")
 
 display = phat.InkyPHAT_SSD1608("red")
+WeatherManager = WeatherManagerClass(display)
 
 # Initial boot, print the InkyPhat Logo
 try:

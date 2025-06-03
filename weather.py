@@ -26,14 +26,16 @@ except ImportError:
 # Get the current path
 PATH = os.path.dirname(__file__)
 
-class WeatherManager:
+class WeatherManagerClass:
     # Details to customise your weather display
 
     CITY = Secrets.city
     COUNTRYCODE = Secrets.countrycode
     WARNING_TEMP = 25.0
 
-    def __init__(self, display=phat.InkyPHAT_SSD1608("red")):
+    display = None
+
+    def __init__(self, display):
         self.display = display
 
 
