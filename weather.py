@@ -144,9 +144,8 @@ class WeatherManagerClass:
         draw.line((207, 70, 207, 70), 2)  # Red seaweed pixel :D
 
         # Write text with weather values to the canvas
-        datetime = time.strftime("%d/%m %H:%M")
-
-        draw.text((41, 14), datetime, self.display.WHITE, font=font)
+        datetime = time.strftime('%a %b %d %H:%M')
+        draw.text((38, 14), datetime, self.display.WHITE, font=font)
 
         draw.text((83, 43), "T", self.display.WHITE, font=font)
         draw.text((103, 43), "{}°C".format(temperature), self.display.WHITE if temperature < self.WARNING_TEMP else self.display.RED, font=font)
