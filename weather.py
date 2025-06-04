@@ -8,6 +8,7 @@ from PIL import Image, ImageDraw, ImageFont
 from font_fredoka_one import FredokaOne
 from inky import eeprom
 from inky import phat
+from PiSugar import PiSugarClass
 
 # Import secrets
 from secrets import Secrets
@@ -110,6 +111,8 @@ class WeatherManagerClass:
         location_string = "{city}, {countrycode}".format(city=self.CITY, countrycode=self.COUNTRYCODE)
         weather = self.get_weather(location_string)
 
+        PiSugar = PiSugarClass()
+
         # Create a new canvas to draw on
         img = Image.open(os.path.join(PATH, "resources/Background_250x122.png")).resize(self.display.resolution)
         draw = ImageDraw.Draw(img)
@@ -129,7 +132,22 @@ class WeatherManagerClass:
             wifiIcon = Image.open(os.path.join(PATH, "resources/icons/system/WifiBad1_thick.png"))
             print("Warning, no weather information found!")
 
-        img.paste(wifiIcon, (190, 1), self.create_mask(wifiIcon))
+        # Add Wifi icon
+        img.paste(wifiIcon, (180, 1), self.create_mask(wifiIcon))
+
+        # Add Battery icon & number
+        battPerc = PiSugar.getBatteryPerc()
+        if battPerc > 80.0:
+            battIcon = Image.open(os.path.join(PATH, "resources/icons/system/Battery4.png"))
+        elif battPerc > 60.0:
+            battIcon = Image.open(os.path.join(PATH, "resources/icons/system/Battery3.png"))
+        elif battPerc > 40.0:
+            battIcon = Image.open(os.path.join(PATH, "resources/icons/system/Battery2.png"))
+        elif battPerc > 20.0:
+            battIcon = Image.open(os.path.join(PATH, "resources/icons/system/Battery1.png"))
+        else:
+            battIcon = Image.open(os.path.join(PATH, "resources/icons/system/BatteryEmpty.png"))
+        img.paste(battIcon, (190, 1), self.create_mask(battIcon))
 
         # Load our icon files and generate masks
         for icon in glob.glob(os.path.join(PATH, "resources/icons/weather/icon-*.png")):
