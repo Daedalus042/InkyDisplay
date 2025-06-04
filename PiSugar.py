@@ -38,6 +38,27 @@ class PiSugarClass:
     def getBatteryPerc(self):
         return (((self.getBatteryVoltage() - 3.1) / 1.1) * 100.0)
 
+    def create_mask(self, source):
+        """Create a transparency mask.
+
+        Takes a paletized source image and converts it into a mask
+        permitting all the colours supported by Inky pHAT (0, 1, 2)
+        or an optional list of allowed colours.
+
+        :param mask: Optional list of Inky pHAT colours to allow.
+
+        """
+        mask=(self.display.WHITE, self.display.BLACK, self.display.RED)
+        mask_image = Image.new("1", source.size)
+        w, h = source.size
+        for x in range(w):
+            for y in range(h):
+                p = source.getpixel((x, y))
+                if p in mask:
+                    mask_image.putpixel((x, y), 255)
+
+        return mask_image
+
     class _registerMap(Enum):
         Temperature  = 0x04
         BatteryLower = 0x22
@@ -79,6 +100,21 @@ if __name__ == "__main__":
 
     img = Image.open(os.path.join(PATH, "resources/Background_250x122.png")).resize(display.resolution)
     draw = ImageDraw.Draw(img)
+
+    # Add Battery icon & number
+    battPerc = PiSugar.getBatteryPerc()
+    if battPerc > 80.0:
+        battIcon = Image.open(os.path.join(PATH, "resources/icons/system/Battery4.png"))
+    elif battPerc > 60.0:
+        battIcon = Image.open(os.path.join(PATH, "resources/icons/system/Battery3.png"))
+    elif battPerc > 40.0:
+        battIcon = Image.open(os.path.join(PATH, "resources/icons/system/Battery2.png"))
+    elif battPerc > 20.0:
+        battIcon = Image.open(os.path.join(PATH, "resources/icons/system/Battery1.png"))
+    else:
+        battIcon = Image.open(os.path.join(PATH, "resources/icons/system/BatteryEmpty.png"))
+    img.paste(battIcon, (190, 1), self.create_mask(battIcon))
+
 
     # Load the FredokaOne font
     font = ImageFont.truetype(FredokaOne, 22)
