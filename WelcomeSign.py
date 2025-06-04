@@ -12,6 +12,9 @@ from secrets import Secrets
 # Debug boolean
 DEBUG = True
 
+# Get the current path
+PATH = os.path.dirname(__file__)
+
 if __name__ == "__main__":
 
     # Connect to the Inky Display
@@ -30,6 +33,6 @@ if __name__ == "__main__":
     except NotImplementedError:
         pass
 
-    img = Image.open(os.path.join(PATH, "resources/InkypHAT-250x122.png")).resize(display.resolution)
+    img = Image.open(os.path.join(PATH, "resources/Welcome_Black+Red.png")).resize(display.resolution)
     display.set_image(img)
     display.show()
