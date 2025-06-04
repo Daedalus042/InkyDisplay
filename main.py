@@ -36,7 +36,7 @@ try:
 except NotImplementedError:
     pass
 
-img = Image.open(os.path.join("/home/", Secrets.username, "repos/inky/examples/phat/resources/InkypHAT-250x122.png"))
+img = Image.open(os.path.join(PATH, "resources/InkypHAT-250x122.png")).resize(display.resolution)
 display.set_image(img)
 display.show()
 

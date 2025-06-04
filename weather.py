@@ -178,7 +178,6 @@ if __name__ == "__main__":
     display = phat.InkyPHAT_SSD1608("red")
     WeatherManager = WeatherManagerClass(display)
 
-    # Initial boot, print the InkyPhat Logo
     try:
         display.set_border(display.BLACK)
     except NotImplementedError:
