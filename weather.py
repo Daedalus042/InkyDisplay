@@ -110,7 +110,12 @@ class WeatherManagerClass:
         location_string = "{city}, {countrycode}".format(city=self.CITY, countrycode=self.COUNTRYCODE)
         weather = self.get_weather(location_string)
 
+        # Create a new canvas to draw on
+        img = Image.open(os.path.join(PATH, "resources/Background_250x122.png")).resize(self.display.resolution)
+        draw = ImageDraw.Draw(img)
+
         if weather:
+            wifiIcon = Image.open(os.path.join(PATH, "resources/icons/system/WifiGood1.png"))
             temperature = weather["temperature"]
             windspeed = weather["windspeed"]
             weathercode = weather["weathercode"]
@@ -121,14 +126,13 @@ class WeatherManagerClass:
                     break
 
         else:
+            wifiIcon = Image.open(os.path.join(PATH, "resources/icons/system/WifiBad1_thick.png"))
             print("Warning, no weather information found!")
 
-        # Create a new canvas to draw on
-        img = Image.open(os.path.join(PATH, "resources/Background_250x122.png")).resize(self.display.resolution)
-        draw = ImageDraw.Draw(img)
+        img.paste(wifiIcon, (190, 1), self.create_mask(wifiIcon))
 
         # Load our icon files and generate masks
-        for icon in glob.glob(os.path.join(PATH, "resources/icon-*.png")):
+        for icon in glob.glob(os.path.join(PATH, "resources/icons/weather/icon-*.png")):
             icon_name = icon.split("icon-")[1].replace(".png", "")
             icon_image = Image.open(icon)
             icons[icon_name] = icon_image
