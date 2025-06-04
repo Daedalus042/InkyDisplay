@@ -133,9 +133,9 @@ class WeatherManagerClass:
             print("Warning, no weather information found!")
 
         # Add Wifi icon
-        img.paste(wifiIcon, (180, 1), self.create_mask(wifiIcon))
+        img.paste(wifiIcon, (170, 1), self.create_mask(wifiIcon))
 
-        # Add Battery icon & number
+        # Add Battery icon & number (TODO)
         battPerc = PiSugar.getBatteryPerc()
         if battPerc > 80.0:
             battIcon = Image.open(os.path.join(PATH, "resources/icons/system/Battery4.png"))

@@ -40,5 +40,5 @@ img = Image.open(os.path.join(PATH, "resources/InkypHAT-250x122.png")).resize(di
 display.set_image(img)
 display.show()
 
-time.sleep(30)
-WeatherManager.doWeatherUpdate()
+# time.sleep(30)
+# WeatherManager.doWeatherUpdate()
