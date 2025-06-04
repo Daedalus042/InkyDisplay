@@ -52,7 +52,10 @@ class WeatherManagerClass:
     def get_weather(self, address):
         coords = self.get_coords(address)
         weather = {}
-        res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "&current_weather=true")
+        try:
+            res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "&current_weather=true")
+        except:
+            return weather
         if res.status_code == 200:
             j = json.loads(res.text)
             current = j["current_weather"]
@@ -180,7 +183,7 @@ class WeatherManagerClass:
             img.paste(icons[weather_icon], (30, 45), masks[weather_icon])
 
         else:
-            draw.text((30, 45), "?", self.display.RED, font=font)
+            draw.text((45, 55), "?", self.display.RED, font=font)
 
         # display the weather data on Inky pHAT
         self.display.set_image(img)
