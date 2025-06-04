@@ -12,6 +12,9 @@ from secrets import Secrets
 # Debug boolean
 DEBUG = True
 
+# Get the current path
+PATH = os.path.dirname(__file__)
+
 if __name__ == "__main__":
 
     # Connect to the Inky Display
