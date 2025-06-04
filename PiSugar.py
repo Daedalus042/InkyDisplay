@@ -9,6 +9,9 @@ from font_fredoka_one import FredokaOne
 from inky import eeprom
 from inky import phat
 
+# Debug boolean
+DEBUG = True
+
 class PiSugarClass:
     ADDRESS = 0x57
     Available = False
@@ -48,16 +51,6 @@ class PiSugarClass:
         :param mask: Optional list of Inky pHAT colours to allow.
 
         """
-        mask=(self.display.WHITE, self.display.BLACK, self.display.RED)
-        mask_image = Image.new("1", source.size)
-        w, h = source.size
-        for x in range(w):
-            for y in range(h):
-                p = source.getpixel((x, y))
-                if p in mask:
-                    mask_image.putpixel((x, y), 255)
-
-        return mask_image
 
     class _registerMap(Enum):
         Temperature  = 0x04
@@ -113,7 +106,17 @@ if __name__ == "__main__":
         battIcon = Image.open(os.path.join(PATH, "resources/icons/system/Battery1.png"))
     else:
         battIcon = Image.open(os.path.join(PATH, "resources/icons/system/BatteryEmpty.png"))
-    img.paste(battIcon, (190, 1), PiSugar.create_mask(battIcon))
+
+    # Create Mask
+    mask=(display.WHITE, display.BLACK, display.RED)
+    mask_image = Image.new("1", battIcon.size)
+    w, h = battIcon.size
+    for x in range(w):
+        for y in range(h):
+            p = battIcon.getpixel((x, y))
+            if p in mask:
+                mask_image.putpixel((x, y), 255)
+    img.paste(battIcon, (190, 1), mask_image)
 
 
     # Load the FredokaOne font
