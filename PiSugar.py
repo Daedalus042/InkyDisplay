@@ -20,7 +20,7 @@ class PiSugarClass:
 
         try:
             SugarID = self._i2cBus.read_byte_data(self.ADDRESS, 0)
-            if SugarID is 3:
+            if SugarID == 3:
                 self.Available = True
         except OSError as err:
             print("Attention, no PiSugar found!")
@@ -31,17 +31,17 @@ class PiSugarClass:
             self._i2cBus.close()
 
     def getBatteryVoltage(self):
-        lowerByte = self._i2cBus.read_i2c_block_data(self.ADDRESS, self._registerMap.BatteryLower)
-        upperByte = self._i2cBus.read_i2c_block_data(self.ADDRESS, self._registerMap.BatteryUpper)
-        return (((upperByte << 8) + lowerByte) / 1000.0)
+        lowerByte = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.BatteryLower.value)
+        upperByte = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.BatteryUpper.value)
+        return (((upperByte << 8) + lowerByte) / 10000.0)
 
     def getBatteryPerc(self):
         return (((self.getBatteryVoltage() - 3.1) / 1.1) * 100.0)
 
     class _registerMap(Enum):
         Temperature  = 0x04
-        BatteryLower = 0xA2
-        BatteryUpper = 0xA3
+        BatteryLower = 0x22
+        BatteryUpper = 0x23
         FW_Version_0 = 0xE2
         FW_Version_1 = 0xE3
         FW_Version_2 = 0xE4
@@ -83,8 +83,8 @@ if __name__ == "__main__":
     # Load the FredokaOne font
     font = ImageFont.truetype(FredokaOne, 22)
     draw.text((38, 14), "Battery:", display.WHITE, font=font)
-    draw.text((83, 14), "%.3f V" % PiSugar.getBatteryVoltage(), display.WHITE, font=font)
-    draw.text((103, 14), "%.1f %" % PiSugar.getBatteryPerc(), display.WHITE, font=font)
+    draw.text((38, 43), "%.3f V" % PiSugar.getBatteryVoltage(), display.WHITE, font=font)
+    draw.text((38, 72), "%.1f %%" % PiSugar.getBatteryPerc(), display.WHITE, font=font)
 
     # display the battery information on Inky pHAT
     display.set_image(img)
