@@ -12,6 +12,9 @@ from inky import phat
 # Import secrets
 from secrets import Secrets
 
+# Debug boolean
+DEBUG = True
+
 # Requirements for Weather geolocation
 try:
     import requests
@@ -161,3 +164,25 @@ class WeatherManagerClass:
         # display the weather data on Inky pHAT
         self.display.set_image(img)
         self.display.show()
+
+if __name__ == "__main__":
+
+    # Connect to the Inky Display
+    _eeprom = eeprom.read_eeprom()
+    if _eeprom is None:
+        raise RuntimeError("No EEPROM detected! You must manually initialise your Inky board.")
+    elif _eeprom.display_variant != 11:
+        if DEBUG:
+            print("Found eeprom id " + _eeprom.display_variant)
+        raise RuntimeError("Display is not the expected variant")
+
+    display = phat.InkyPHAT_SSD1608("red")
+    WeatherManager = WeatherManagerClass(display)
+
+    # Initial boot, print the InkyPhat Logo
+    try:
+        display.set_border(display.BLACK)
+    except NotImplementedError:
+        pass
+
+    WeatherManager.doWeatherUpdate()
