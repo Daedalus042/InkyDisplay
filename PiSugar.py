@@ -39,7 +39,7 @@ class PiSugarClass:
         return (((upperByte << 8) + lowerByte) / 10000.0)
 
     def getBatteryPerc(self):
-        return (((self.getBatteryVoltage() - 3.1) / 1.1) * 100.0)
+        return (((self.getBatteryVoltage() - 2.1) / 2.1) * 100.0)
 
     def create_mask(self, source):
         """Create a transparency mask.
