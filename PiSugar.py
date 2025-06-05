@@ -52,6 +52,14 @@ class PiSugarClass:
 
         """
 
+    def buffDump(self):
+        buffer = []
+        for i in range(0, 256, 32):
+            word = self._i2cBus.read_i2c_block_data(0x57, i, 32)
+            buffer.extend(word)
+            time.sleep(0.1)
+        return buffer
+
     class _registerMap(Enum):
         Temperature  = 0x04
         BatteryLower = 0x22
