@@ -8,7 +8,7 @@ from PIL import Image, ImageDraw, ImageFont
 from font_fredoka_one import FredokaOne
 from inky import eeprom
 from inky import phat
-from PiSugar import PiSugarClass
+from PiSugar import PiSugarConnect
 
 # Import secrets
 from secrets import Secrets
@@ -114,7 +114,7 @@ class WeatherManagerClass:
         location_string = "{city}, {countrycode}".format(city=self.CITY, countrycode=self.COUNTRYCODE)
         weather = self.get_weather(location_string)
 
-        PiSugar = PiSugarClass()
+        PiSugar = PiSugarConnect()
 
         # Create a new canvas to draw on
         img = Image.open(os.path.join(PATH, "resources/Background_250x122.png")).resize(self.display.resolution)

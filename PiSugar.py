@@ -12,26 +12,35 @@ from inky import phat
 # Debug boolean
 DEBUG = True
 
+def PiSugarConnect():
+    # Open I2C connection
+    _i2cBus = smbus.SMBus(1)
+
+    try:
+        SugarID = _i2cBus.read_byte_data(0x57, 0)
+        if SugarID == 3:
+            return PiSugarClass(_i2cBus)
+    except OSError as err:
+        print("Attention, no PiSugar found!")
+        _i2cBus.close()
+        return PiDummy()
+
 class PiSugarClass:
     ADDRESS = 0x57
     Available = False
     _i2cBus = None
 
-    def __init__(self):
-        # Open I2C connection
-        self._i2cBus = smbus.SMBus(1)
-
-        try:
-            SugarID = self._i2cBus.read_byte_data(self.ADDRESS, 0)
-            if SugarID == 3:
-                self.Available = True
-        except OSError as err:
-            print("Attention, no PiSugar found!")
+    def __init__(self, bus):
+        self._i2cBus = bus
+        self.Available = True
 
     def __del__(self):
         # Close I2C connection
         if self._i2cBus is not None:
             self._i2cBus.close()
+
+    def isAvailable(self):
+        return self.Available
 
     def getBatteryVoltage(self):
         lowerByte = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.BatteryLower.value)
@@ -121,6 +130,19 @@ class PiSugarClass:
     --------+------------+----------------+----------------+---------------+------------------+---------+------+--------------
         """
 
+class PiDummy:
+    def isAvailable(self):
+        return False
+
+    def getBatteryVoltage(self):
+        return 0.0
+
+    def getBatteryPerc(self):
+        return 0
+
+    def buffDump(self):
+        return range(0, 256*32)
+
 if __name__ == "__main__":
     # Get the current path
     PATH = os.path.dirname(__file__)
@@ -136,7 +158,7 @@ if __name__ == "__main__":
         raise RuntimeError("Display is not the expected variant")
 
     display = phat.InkyPHAT_SSD1608("red")
-    PiSugar = PiSugarClass()
+    PiSugar = PiSugarConnect()
 
     try:
         display.set_border(display.RED)

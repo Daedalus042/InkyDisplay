@@ -12,8 +12,14 @@ from inky import eeprom
 from inky import phat
 from PiSugar import PiSugarClass
 
+# Import secrets
+from secrets import Secrets
+
 # Debug boolean
 DEBUG = True
+
+# Get the current path
+PATH = os.path.dirname(__file__)
 
 def signalHandler(sig, frame):
     print("Process ended")
@@ -62,7 +68,7 @@ except NotImplementedError:
     pass
 
 if DEBUG:
-    fid = open("~/LogVoltage.csv", "x")
+    fid = open(os.path.join(PATH, "../LogVoltage.csv"), "w+")
 
 while True:
     # Blank canvas
@@ -70,15 +76,25 @@ while True:
     draw = ImageDraw.Draw(img)
 
     # Load the FredokaOne font
-    font = ImageFont.truetype(FredokaOne, 12)
-    draw.text((38, 14), "Battery: %.3f V | %.1f %%" % PiSugar.getBatteryVoltage() % PiSugar.getBatteryPerc(), display.Black, font=font)
-    draw.text((38, 44), PiSugar.buffDump(), display.Black, font=font)
+    font = ImageFont.truetype(FredokaOne, 11)
+    draw.text((5, 10), "Battery: %.3f V | %.1f %%" % (PiSugar.getBatteryVoltage(), PiSugar.getBatteryPerc()), display.BLACK, font=font)
+    bd = PiSugar.buffDump()
+    bufferString = ""
+    for byte in bd:
+        bufferString += "0x%02X " % byte
+    draw.text((5, 30), bufferString[0:40], display.BLACK, font=font)
+    draw.text((5, 45), bufferString[40:80], display.BLACK, font=font)
+    draw.text((5, 60), bufferString[80:110], display.BLACK, font=font)
+    draw.text((185, 60), bufferString[110:120], display.RED, font=font)
+    draw.text((5, 75), bufferString[120:160], display.BLACK, font=font)
+    draw.text((5, 90), bufferString[160:200], display.BLACK, font=font)
+    draw.text((5, 105), bufferString[200:], display.BLACK, font=font)
     if DEBUG:
-        fid.write()
+        fid.write(time.strftime('%H:%M,') + bufferString.replace(" ", ","))
 
     # Update Display
     display.set_image(img)
     display.show()
 
-    time.sleep(300.0)
-
+    for i in range(0, 150):
+        time.sleep(2.0)
