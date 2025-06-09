@@ -1,6 +1,7 @@
 import os
 import time
 import json
+import traceback
 import urllib.request
 from sys import exit
 
@@ -23,15 +24,20 @@ HEADER = 15
 PATH = os.path.dirname(__file__)
 CACHE = "/home/" + Secrets.username + "/.cache/Inky/"
 
-class xkcd:
+class XkcdClass:
     TITLE = ""
     NUMBER = 0
     IMG = None
     DAY = 0
     MONTH = 0
     YEAR = 0
+    DISPLAY = None
 
     def __init__(self):
+        self.refresh()
+
+    def __init__(self, display):
+        self.DISPLAY = display
         self.refresh()
 
 
@@ -56,20 +62,21 @@ class xkcd:
             stream = urllib.request.urlopen(xkcdUrl)
             currentJson = stream.read().decode()
             stream.close()
-            currentInfo = json.load(currentJson)
+            currentInfo = json.loads(currentJson)
             if currentInfo["num"] > self.NUMBER:
-                print("Info: Found a new XKCD from %i/%i/%i" % (currentInfo["month"], currentInfo["day"], currentInfo["year"]))
+                print("Info: Found a new XKCD from %02i/%02i/%02i" % (int(currentInfo["month"]), int(currentInfo["day"]), int(currentInfo["year"])))
 
                 # Overwrite cached image
-                imgFid = open(os.path.join(CACHE, "xkcd.png"), "w")
+                """ imgFid = open(os.path.join(CACHE, "xkcd.png"), "w")
                 imgStream = urllib.request.urlopen(currentInfo["img"])
-                imgFid.write(imgStream.read().decode())
+                imgFid.write(imgStream.read())
                 imgStream.close()
-                imgFid.close()
+                imgFid.close() """
+                urllib.request.urlretrieve(currentInfo["img"], os.path.join(CACHE, "xkcd.png"))
 
                 # Overwrite cached info
                 xkcdInfoFid = open(os.path.join(CACHE, "info.0.json"), "w")
-                xkcdInfoFid.print(currentJson)
+                xkcdInfoFid.write(currentJson)
                 xkcdInfoFid.close()
 
                 # Clean-up
@@ -81,13 +88,47 @@ class xkcd:
             self.DAY = currentInfo["day"]
             self.MONTH = currentInfo["month"]
             self.YEAR = currentInfo["year"]
-        except URLError:
+        except urllib.error.URLError:
             print("ERR: Could not open URL")
-        except:
-            print("ERR: Unexpected online error")
+        except Exception as err:
+            # print("ERR: Unexpected online error: %s" % err)
+            traceback.print_exc()
+
+    def getImage(self):
+        return open(os.path.join(CACHE, "xkcd.png"), "r")
+
+    def getFormattedImage(self):
+        titleFont = ImageFont.truetype("DejaVuSans.ttf", 12)
+
+        # Load image and determine scaling
+        img = Image.open(os.path.join(CACHE, "xkcd.png"))
+        (imgx, imgy) = img.size
+        quotient = max(imgx/display.resolution[0], imgy/(display.resolution[1]-HEADER))
+        (width, height) = (int(imgx/quotient), int(imgy/quotient))
+
+        # Scale and center image in display
+        scaledImg = img.resize((int(imgx/quotient), int(imgy/quotient)), Image.LANCZOS)
+        imgOut = Image.new("RGB", display.resolution, (255, 255, 255))
+        imgOut.paste(scaledImg, (int((display.resolution[0] - scaledImg.size[0])/2), int(HEADER + (display.resolution[1] - scaledImg.size[1])/2)))
+        draw = ImageDraw.Draw(imgOut)
+        title = "XKCD - %s" % self.TITLE
+        _, _, txtx, _ = draw.textbbox((0,0), title, font=titleFont)
+        draw.text((int((display.resolution[0] - txtx)/2), 0), title, display.BLACK, font=titleFont)
+
+        # Clean-up & return
+        img.close()
+        return imgOut
+
+    def displayImage(self):
+        if self.DISPLAY is None:
+            return
+
+        # Update display with image
+        display.set_image(self.getFormattedImage())
+        display.show()
 
 if __name__ == "__main__":
-# Connect to the Inky Display
+  # Connect to the Inky Display
   _eeprom = eeprom.read_eeprom()
   if _eeprom is None:
     raise RuntimeError("No EEPROM detected! You must manually initialise your Inky board.")
@@ -104,6 +145,12 @@ if __name__ == "__main__":
   except NotImplementedError:
     pass
 
+
+  XkcdComic = XkcdClass(display)
+  XkcdComic.refresh()
+  XkcdComic.displayImage()
+
+"""
   # Format XKCD image for display steps:
   # - Open XCKD image
   # - get original size
@@ -116,7 +163,7 @@ if __name__ == "__main__":
   font = ImageFont.truetype(FredokaOne,12)
   font2 = ImageFont.truetype("DejaVuSans.ttf", 12)
   sampleMethod = [Image.NEAREST, Image.BILINEAR, Image.BICUBIC, Image.LANCZOS]
-  img = Image.open(os.path.join(PATH, "xkcd.png"))
+  img = Image.open(os.path.join(CACHE, "xkcd.png"))
   (imgx, imgy) = img.size
   quotient = max(imgx/display.resolution[0], imgy/(display.resolution[1]-HEADER))
   (width, height) = (int(imgx/quotient), int(imgy/quotient))
@@ -132,3 +179,5 @@ if __name__ == "__main__":
     display.set_image(imgOut)
     display.show()
     time.sleep(20)
+"""
+
