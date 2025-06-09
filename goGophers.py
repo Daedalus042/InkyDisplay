@@ -35,8 +35,8 @@ if __name__ == "__main__":
 
     img = Image.open(os.path.join(PATH, "resources/Goldy.png"))
     draw = ImageDraw.Draw(img)
-    rahFont = ImageFont.truetype(FredokaOne, 34)
-    _, _, txtx, txty = draw.textbbox((0,0), "SKI U MAH", font=rahFont)
-    draw.text((int((display.resolution[0] - txtx)/2), int((display.resolution[1] - txty))), "SKI U MAH", display.RED, font=rahFont)
+    rahFont = ImageFont.truetype(FredokaOne, 25)
+    _, _, txtx, txty = draw.textbbox((0,0), "SKI-U-MAH!", font=rahFont)
+    draw.text((int((display.resolution[0] - txtx)/2), int((display.resolution[1] - txty))), "SKI-U-MAH!", display.RED, font=rahFont)
     display.set_image(img)
     display.show()
