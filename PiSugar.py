@@ -43,9 +43,14 @@ class PiSugarClass:
         return self.Available
 
     def getBatteryVoltage(self):
-        lowerByte = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.BatteryLower.value)
-        upperByte = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.BatteryUpper.value)
-        return (((upperByte << 8) + lowerByte) / 10000.0)
+        samples = []
+        for i in range(0,10):
+            lowerByte = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.BatteryLower.value)
+            upperByte = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.BatteryUpper.value)
+            samples.extend(((upperByte << 8) + lowerByte) / 10000.0)
+            time.sleep(0.05)
+        avg = sum(samples) / len(samples)
+        return avg
 
     def getBatteryPerc(self):
         return (((self.getBatteryVoltage() - 2.1) / 2.1) * 100.0)
