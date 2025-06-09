@@ -55,7 +55,16 @@ class WeatherManagerClass:
         try:
             res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "&current_weather=true")
         except:
-            return weather
+            try:
+                print("Couldn't connect to wifi, trying bluetooth tehtering")
+                os.system("busctl call org.bluez /org/bluez/hci0/dev%s org.bluez.Network1 Connect s nap" % Secrets.deviceid)
+                time.sleep(3.0)
+                os.system("sudo dhclient -v bnep0")
+                time.sleep(1.0)
+                res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "&current_weather=true")
+            except:
+                print("Couldn't access internet")
+                return weather
         if res.status_code == 200:
             j = json.loads(res.text)
             current = j["current_weather"]

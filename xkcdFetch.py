@@ -41,7 +41,7 @@ class XkcdClass:
         self.refresh()
 
 
-    def refresh(self):
+    def refresh(self, force=False):
         # Try to open the cached info file
         try:
             xkcdInfoFid = open(os.path.join(CACHE, "info.0.json"), "r")
@@ -53,6 +53,9 @@ class XkcdClass:
             self.DAY = cachedInfo["day"]
             self.MONTH = cachedInfo["month"]
             self.YEAR = cachedInfo["year"]
+            """if "%04i-%02i-%02i" % (self.YEAR, self.Month, self.DAY) is time.strftime("%Y-%m-%d", time.localtime()):
+                 print("Most recent is already from today")
+                 return"""
         except:
             print("ERR: Could not open cached file")
 
