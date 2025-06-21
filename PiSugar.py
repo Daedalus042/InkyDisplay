@@ -42,12 +42,22 @@ class PiSugarClass:
     def isAvailable(self):
         return self.Available
 
+    def getBatteryInfo(self):
+        samples = []
+        for i in range(0,10):
+            lowerByte = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.BatteryLower.value)
+            upperByte = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.BatteryUpper.value)
+            energyLevel = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.EnergyLevel.value)
+            samples.append([upperByte, lowerByte, energyLevel])
+            time.sleep(0.05)
+        print(samples)
+
     def getBatteryVoltage(self):
         samples = []
         for i in range(0,10):
             lowerByte = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.BatteryLower.value)
             upperByte = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.BatteryUpper.value)
-            samples.extend(((upperByte << 8) + lowerByte) / 10000.0)
+            samples.append(((upperByte << 8) + lowerByte) / 1000.0)
             time.sleep(0.05)
         avg = sum(samples) / len(samples)
         return avg
@@ -76,8 +86,9 @@ class PiSugarClass:
 
     class _registerMap(Enum):
         Temperature  = 0x04
-        BatteryLower = 0x22
-        BatteryUpper = 0x23
+        BatteryUpper = 0x22
+        BatteryLower = 0x23
+        EnergyLevel  = 0x2A
         FW_Version_0 = 0xE2
         FW_Version_1 = 0xE3
         FW_Version_2 = 0xE4

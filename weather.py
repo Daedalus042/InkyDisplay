@@ -2,6 +2,7 @@ import os
 import glob
 import json
 import time
+import netifaces
 
 # Import dependancies
 from PIL import Image, ImageDraw, ImageFont
@@ -57,11 +58,23 @@ class WeatherManagerClass:
         except:
             try:
                 print("Couldn't connect to wifi, trying bluetooth tehtering")
-                os.system("busctl call org.bluez /org/bluez/hci0/dev%s org.bluez.Network1 Connect s nap" % Secrets.deviceid)
-                time.sleep(3.0)
-                os.system("sudo dhclient -v bnep0")
+                os.system("bluetoothctl connect %s" % Secrets.deviceid)
                 time.sleep(1.0)
-                res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "&current_weather=true")
+                os.system("busctl call org.bluez /org/bluez/hci0/dev_%s org.bluez.Network1 Connect s nap" % Secrets.deviceid)
+                time.sleep(0.5)
+                os.system("sudo dhclient -v bnep0")
+                time.sleep(0.5)
+                for i in range(0, 50):
+                  try:
+                    # print(i)
+                    res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "&current_weather=true")
+                  except:
+                    print("Err on %i" % i)
+                    time.sleep(1.0)
+                    print(netifaces.interfaces())
+                """    time.sleep(5.0)
+                    res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "&current_weather=true")
+                """
             except:
                 print("Couldn't access internet")
                 return weather
