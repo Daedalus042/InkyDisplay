@@ -25,7 +25,7 @@ PATH = os.path.dirname(__file__)
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--display",
-    default=False
+    default=False,
     action='store_true',
     help="Display Battery information to the phat",
 )
@@ -113,5 +113,5 @@ if __name__ == "__main__":
     else:
         fid = open(os.path.join(PATH, "../LogVoltage10m.csv"), "a")
         PiSugar = PiSugar.PiSugarConnect()
-        fid.write(time.strftime('%d %H:%M, ') + PiSugar.getBatteryVoltage() + "V  --  " + PiSugar.getBatteryPerc() + "%  --  Is Charging? " + str(PiSugar.isSuppliedPower()))
-
+        fid.write(time.strftime('%d %H:%M, ') + "%.3f V  --  %.3f %%  --  Is Charging? " % (PiSugar.getBatteryVoltage(), PiSugar.getBatteryPerc()) + str(PiSugar.isSuppliedPower()) + "\n")
+        fid.close()
