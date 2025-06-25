@@ -113,5 +113,5 @@ if __name__ == "__main__":
     else:
         fid = open(os.path.join(PATH, "../LogVoltage10m.csv"), "a")
         PiSugar = PiSugar.PiSugarConnect()
-        fid.write(time.strftime('%d %H:%M, ') + "%.3f V  --  %.3f %%  --  Is Charging? " % (PiSugar.getBatteryVoltage(), PiSugar.getBatteryPerc()) + str(PiSugar.isSuppliedPower()) + "\n")
+        fid.write(time.strftime('%d %H:%M, ') + "%.3f V  --  %.3f %%  --  Energy: %i  --  Is Charging? " % (PiSugar.getBatteryVoltage(), PiSugar.getBatteryPerc(), PiSugar.getBatteryEnergy()) + str(PiSugar.isSuppliedPower()) + "\n")
         fid.close()
