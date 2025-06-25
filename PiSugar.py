@@ -72,6 +72,11 @@ class PiSugarClass:
         """
         return (((self.getBatteryVoltage() - 3.0) / 1.2) * 100.0)
 
+    def isSuppliedPower(self):
+        PowerCtrlReg = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.PowerCtrl.value)
+        extPower = (PowerCtrlReg & (1 << 7)) > 0
+        return extPower
+
     def create_mask(self, source):
         """Create a transparency mask.
 
@@ -92,6 +97,7 @@ class PiSugarClass:
         return buffer
 
     class _registerMap(Enum):
+        PowerCtrl    = 0x02
         Temperature  = 0x04
         BatteryUpper = 0x22
         BatteryLower = 0x23
