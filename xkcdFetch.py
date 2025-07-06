@@ -47,7 +47,7 @@ class XkcdClass:
             xkcdInfoFid = open(os.path.join(CACHE, "info.0.json"), "r")
             cachedInfo = json.load(xkcdInfoFid)
             xkcdInfoFid.close()
-            self.Title = cachedInfo["title"]
+            self.TITLE = cachedInfo["title"]
             self.NUMBER = cachedInfo["num"]
             self.IMG = cachedInfo["img"]
             self.DAY = cachedInfo["day"]
@@ -150,7 +150,6 @@ if __name__ == "__main__":
 
 
   XkcdComic = XkcdClass(display)
-  XkcdComic.refresh()
   XkcdComic.displayImage()
 
 """
@@ -163,24 +162,4 @@ if __name__ == "__main__":
   # - find the larger quotient of original/display
   # - divide original (both dimensions) by quotient
   # - crop
-  font = ImageFont.truetype(FredokaOne,12)
-  font2 = ImageFont.truetype("DejaVuSans.ttf", 12)
-  sampleMethod = [Image.NEAREST, Image.BILINEAR, Image.BICUBIC, Image.LANCZOS]
-  img = Image.open(os.path.join(CACHE, "xkcd.png"))
-  (imgx, imgy) = img.size
-  quotient = max(imgx/display.resolution[0], imgy/(display.resolution[1]-HEADER))
-  (width, height) = (int(imgx/quotient), int(imgy/quotient))
-  # (posx, posy) = (int(display.resolution[0] - sized.size[0])
-  for i in range(3,4):
-    sized = img.resize((int(imgx/quotient), int(imgy/quotient)),sampleMethod[i%4])
-    imgOut = Image.new("RGB", display.resolution, (255, 255, 255))
-    imgOut.paste(sized, (int((display.resolution[0] - sized.size[0])/2), int(HEADER + (display.resolution[1] - sized.size[1])/2)))
-    # cropped = sized.crop((0, -15, display.resolution[0], display.resolution[1]-15))
-    draw = ImageDraw.Draw(imgOut)
-    draw.text((2, 2), "XKCD - Trojan Horse", display.BLACK, font=font2)
-    time.sleep(0.1)
-    display.set_image(imgOut)
-    display.show()
-    time.sleep(20)
 """
-

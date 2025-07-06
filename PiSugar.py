@@ -67,7 +67,7 @@ class PiSugarClass:
         for i in range(0,10):
            samples.append(self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.EnergyLevel.value))
            time.sleep(0.05)
-         return sum(samples) / len(samples)
+        return sum(samples) / len(samples)
 
     def getBatteryPerc(self):
         """
