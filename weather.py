@@ -67,7 +67,7 @@ class WeatherManagerClass:
                 time.sleep(0.5)
                 res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "&current_weather=true&timezone=America%2FChicago&timeformat=unixtime")
             except:
-                res.status_code = None
+                res = None
                 print("ERR: couldn't tether via bluetooth")
                 if DEBUG:
                     print(netifaces.interfaces())
@@ -77,7 +77,7 @@ class WeatherManagerClass:
         forecastFid = open(os.path.join(CACHE, "forecast.json"), "r")
         cachedForecast = json.load(forecastFid)
         forecastFid.close()
-        if res.status_code == 200:
+        if (res != None)  and (res.status_code == 200):
             rawInfo = json.loads(res.text)
             current = rawInfo["current_weather"]
             weather["current"] = True
@@ -188,11 +188,11 @@ class WeatherManagerClass:
             feelsLikeLow = weather["apparent_temperature_min"]
             weathercode = weather["weathercode"]
 
-            draw.text((83, 43), "Temp", self.display.WHITE, font=font)
+            draw.text((83, 43), "T", self.display.WHITE, font=font)
             draw.text((123, 43), "{} | {}°C".format(high, low), self.display.WHITE if high < self.WARNING_TEMP else self.display.RED, font=font)
 
-            draw.text((80, 72), "Feel", self.display.WHITE, font=font)
-            draw.text((123, 72), "{} | {}°C".format(feelsLikeHigh, feelsLikeLow), self.display.WHITE, font=font)
+            draw.text((80, 72), "F", self.display.WHITE, font=font)
+            draw.text((103, 72), "{} | {}°C".format(feelsLikeHigh, feelsLikeLow), self.display.WHITE, font=font)
 
         # Load our icon files and generate masks
         for icon in glob.glob(os.path.join(PATH, "resources/icons/weather/icon-*.png")):
