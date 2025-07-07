@@ -30,6 +30,7 @@ except ImportError:
 
 # Get the current path
 PATH = os.path.dirname(__file__)
+CACHE = "/home/" + Secrets.username + "/.cache/Inky/"
 
 class WeatherManagerClass:
     # Details to customise your weather display
@@ -54,39 +55,54 @@ class WeatherManagerClass:
         coords = self.get_coords(address)
         weather = {}
         try:
-            res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "&current_weather=true")
+            res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "&current_weather=true&timezone=America%2FChicago&timeformat=unixtime")
         except:
             try:
-                print("Couldn't connect to wifi, trying bluetooth tehtering")
+                print("ERR: Couldn't connect to wifi, trying bluetooth tethering")
                 os.system("bluetoothctl connect %s" % Secrets.deviceid)
                 time.sleep(1.0)
                 os.system("busctl call org.bluez /org/bluez/hci0/dev_%s org.bluez.Network1 Connect s nap" % Secrets.deviceid)
                 time.sleep(0.5)
                 os.system("sudo dhclient -v bnep0")
                 time.sleep(0.5)
-                for i in range(0, 50):
-                  try:
-                    # print(i)
-                    res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "&current_weather=true")
-                  except:
-                    print("Err on %i" % i)
-                    time.sleep(1.0)
-                    print(netifaces.interfaces())
-                """    time.sleep(5.0)
-                    res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "&current_weather=true")
-                """
+                res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "&current_weather=true&timezone=America%2FChicago&timeformat=unixtime")
             except:
-                print("Couldn't access internet")
-                return weather
+                res.status_code = None
+                print("ERR: couldn't tether via bluetooth")
+                if DEBUG:
+                    print(netifaces.interfaces())
+
+        # If able to connect successfully, load from internet
+        # If new day, update forecast cache
+        forecastFid = open(os.path.join(CACHE, "forecast.json"), "r")
+        cachedForecast = json.load(forecastFid)
+        forecastFid.close()
         if res.status_code == 200:
-            j = json.loads(res.text)
-            current = j["current_weather"]
+            rawInfo = json.loads(res.text)
+            current = rawInfo["current_weather"]
+            weather["current"] = True
             weather["temperature"] = current["temperature"]
             weather["windspeed"] = current["windspeed"]
             weather["weathercode"] = current["weathercode"]
-            return weather
+            currentDay = int(time.strftime('%d', time.localtime(current["time"])))
+            cachedDay = int(time.strftime('%d', time.localtime(cachedForecast["time"])))
+            if (currentDay != cachedDay) or (int(currentDay["time"]) - int(cachedForecast["time"]) > 86400):
+                # Present day is not the same calendar day as cached day, or interval between current and
+                # cached is more than one day to account for sitting off for exactly one month.
+                res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min&timezone=America%2FChicago&forecast_days=1&timeformat=unixtime")
+                rawInfo = json.loads(res.text)
+                forecast = rawInfo["daily"]
+                forecastFid = open(os.path.join(CACHE, "forecast.json"), "w")
+                forecastFid.write(forecast)
+                forecastFid.close()
         else:
-            return weather
+            weather["current"] = False
+            weather["temperature_max"] = cachedForecast["temperature_2m_max"]
+            weather["temperature_min"] = cachedForecast["temperature_2m_min"]
+            weather["apparent_temperature_max"] = cachedForecast["apparent_temperature_max"]
+            weather["apparent_temperature_min"] = cachedForecast["apparent_temperature_min"]
+            weather["weathercode"] = cachedForecast["weather_code"]
+        return weather
 
 
     def create_mask(self, source):
@@ -142,20 +158,52 @@ class WeatherManagerClass:
         img = Image.open(os.path.join(PATH, "resources/Background_250x122.png")).resize(self.display.resolution)
         draw = ImageDraw.Draw(img)
 
-        if weather:
+        # Load the FredokaOne font
+        font = ImageFont.truetype(FredokaOne, 22)
+
+        # Write text with weather values to the canvas
+        datetime = time.strftime('%a %b %d %H:%M')
+        draw.text((38, 14), datetime, self.display.WHITE, font=font)
+
+        if weather["current"]:
             wifiIcon = Image.open(os.path.join(PATH, "resources/icons/system/WifiGood1.png"))
             temperature = weather["temperature"]
             windspeed = weather["windspeed"]
             weathercode = weather["weathercode"]
 
-            for icon in icon_map:
-                if weathercode in icon_map[icon]:
-                    weather_icon = icon
-                    break
+            draw.text((83, 43), "T", self.display.WHITE, font=font)
+            draw.text((103, 43), "{}°C".format(temperature), self.display.WHITE if temperature < self.WARNING_TEMP else self.display.RED, font=font)
+
+            draw.text((80, 72), "W", self.display.WHITE, font=font)
+            draw.text((103, 72), "{}kmh".format(windspeed), self.display.WHITE, font=font)
 
         else:
             wifiIcon = Image.open(os.path.join(PATH, "resources/icons/system/WifiBad1_thick.png"))
             print("Warning, no weather information found!")
+
+            high = weather["temperature_max"]
+            low = weather["temperature_min"]
+            feelsLikeHigh = weather["apparent_temperature_max"]
+            feelsLikeLow = weather["apparent_temperature_min"]
+            weathercode = weather["weathercode"]
+
+            draw.text((83, 43), "Temp", self.display.WHITE, font=font)
+            draw.text((123, 43), "{} | {}°C".format(high, low), self.display.WHITE if high < self.WARNING_TEMP else self.display.RED, font=font)
+
+            draw.text((80, 72), "Feel", self.display.WHITE, font=font)
+            draw.text((123, 72), "{} | {}°C".format(feelsLikeHigh, feelsLikeLow), self.display.WHITE, font=font)
+
+        for icon in icon_map:
+            if weathercode in icon_map[icon]:
+                weather_icon = icon
+                break
+
+        # Draw the current weather icon over the backdrop
+        if weather_icon is not None:
+            img.paste(icons[weather_icon], (30, 45), masks[weather_icon])
+
+        else:
+            draw.text((45, 55), "?", self.display.RED, font=font)
 
         # Add Wifi icon
         img.paste(wifiIcon, (170, 1), self.create_mask(wifiIcon))
@@ -181,31 +229,11 @@ class WeatherManagerClass:
             icons[icon_name] = icon_image
             masks[icon_name] = self.create_mask(icon_image)
 
-        # Load the FredokaOne font
-        font = ImageFont.truetype(FredokaOne, 22)
-
         # Draw lines to frame the weather data
         draw.line((75, 41, 75, 100))       # Vertical line
         draw.line((27, 41, 222, 41))      # Horizontal top line
         draw.line((75, 70, 222, 70))      # Horizontal middle line
         draw.line((207, 70, 207, 70), 2)  # Red seaweed pixel :D
-
-        # Write text with weather values to the canvas
-        datetime = time.strftime('%a %b %d %H:%M')
-        draw.text((38, 14), datetime, self.display.WHITE, font=font)
-
-        draw.text((83, 43), "T", self.display.WHITE, font=font)
-        draw.text((103, 43), "{}°C".format(temperature), self.display.WHITE if temperature < self.WARNING_TEMP else self.display.RED, font=font)
-
-        draw.text((80, 72), "W", self.display.WHITE, font=font)
-        draw.text((103, 72), "{}kmh".format(windspeed), self.display.WHITE, font=font)
-
-        # Draw the current weather icon over the backdrop
-        if weather_icon is not None:
-            img.paste(icons[weather_icon], (30, 45), masks[weather_icon])
-
-        else:
-            draw.text((45, 55), "?", self.display.RED, font=font)
 
         # display the weather data on Inky pHAT
         self.display.set_image(img)
