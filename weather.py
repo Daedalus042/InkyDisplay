@@ -89,7 +89,7 @@ class WeatherManagerClass:
             if (currentDay != cachedDay) or (int(currentDay["time"]) - int(cachedForecast["time"]) > 86400):
                 # Present day is not the same calendar day as cached day, or interval between current and
                 # cached is more than one day to account for sitting off for exactly one month.
-                res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min&timezone=America%2FChicago&forecast_days=1&timeformat=unixtime")
+                res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min&timezone=America%2FChicago&forecast_days=1&timeformat=unixtime")
                 rawInfo = json.loads(res.text)
                 forecast = rawInfo["daily"]
                 forecastFid = open(os.path.join(CACHE, "forecast.json"), "w")
