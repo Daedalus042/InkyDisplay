@@ -86,7 +86,7 @@ class WeatherManagerClass:
             weather["weathercode"] = current["weathercode"]
             currentDay = int(time.strftime('%d', time.localtime(current["time"])))
             cachedDay = int(time.strftime('%d', time.localtime(cachedForecast["time"][0])))
-            if (currentDay != cachedDay) or (int(currentDay["time"]) - int(cachedForecast["time"][0]) > 86400):
+            if (currentDay != cachedDay) or (current["time"] - cachedForecast["time"][0] > 86400):
                 # Present day is not the same calendar day as cached day, or interval between current and
                 # cached is more than one day to account for sitting off for exactly one month.
                 print("Today's forcast is out of date. Updating now")
@@ -194,6 +194,14 @@ class WeatherManagerClass:
             draw.text((80, 72), "Feel", self.display.WHITE, font=font)
             draw.text((123, 72), "{} | {}°C".format(feelsLikeHigh, feelsLikeLow), self.display.WHITE, font=font)
 
+        # Load our icon files and generate masks
+        for icon in glob.glob(os.path.join(PATH, "resources/icons/weather/icon-*.png")):
+            icon_name = icon.split("icon-")[1].replace(".png", "")
+            icon_image = Image.open(icon)
+            icons[icon_name] = icon_image
+            masks[icon_name] = self.create_mask(icon_image)
+
+        weather_icon = None
         for icon in icon_map:
             if weathercode in icon_map[icon]:
                 weather_icon = icon
@@ -222,13 +230,6 @@ class WeatherManagerClass:
         else:
             battIcon = Image.open(os.path.join(PATH, "resources/icons/system/BatteryEmpty.png"))
         img.paste(battIcon, (190, 1), self.create_mask(battIcon))
-
-        # Load our icon files and generate masks
-        for icon in glob.glob(os.path.join(PATH, "resources/icons/weather/icon-*.png")):
-            icon_name = icon.split("icon-")[1].replace(".png", "")
-            icon_image = Image.open(icon)
-            icons[icon_name] = icon_image
-            masks[icon_name] = self.create_mask(icon_image)
 
         # Draw lines to frame the weather data
         draw.line((75, 41, 75, 100))       # Vertical line
