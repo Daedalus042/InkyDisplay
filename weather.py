@@ -10,6 +10,7 @@ from font_fredoka_one import FredokaOne
 from inky import eeprom
 from inky import phat
 from PiSugar import PiSugarConnect
+from quickConnect import checkInternet
 
 # Import secrets
 from secrets import Secrets
@@ -54,23 +55,13 @@ class WeatherManagerClass:
     def get_weather(self, address):
         coords = self.get_coords(address)
         weather = {}
-        try:
+        if checkInternet():
             res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "&current_weather=true&timezone=America%2FChicago&timeformat=unixtime")
-        except:
-            try:
-                print("ERR: Couldn't connect to wifi, trying bluetooth tethering")
-                os.system("bluetoothctl connect %s" % Secrets.deviceid)
-                time.sleep(1.0)
-                os.system("busctl call org.bluez /org/bluez/hci0/dev_%s org.bluez.Network1 Connect s nap" % Secrets.deviceid)
-                time.sleep(0.5)
-                os.system("sudo dhclient -v bnep0")
-                time.sleep(0.5)
-                res = requests.get("https://api.open-meteo.com/v1/forecast?latitude=" + str(coords[0]) + "&longitude=" + str(coords[1]) + "&current_weather=true&timezone=America%2FChicago&timeformat=unixtime")
-            except:
-                res = None
-                print("ERR: couldn't tether via bluetooth")
-                if DEBUG:
-                    print(netifaces.interfaces())
+        else:
+            res = None
+            print("ERR: couldn't tether via bluetooth")
+            if DEBUG:
+                print(netifaces.interfaces())
 
         # If able to connect successfully, load from internet
         # If new day, update forecast cache
