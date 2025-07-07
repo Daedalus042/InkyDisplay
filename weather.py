@@ -85,8 +85,8 @@ class WeatherManagerClass:
             weather["windspeed"] = current["windspeed"]
             weather["weathercode"] = current["weathercode"]
             currentDay = int(time.strftime('%d', time.localtime(current["time"])))
-            cachedDay = int(time.strftime('%d', time.localtime(cachedForecast["time"])))
-            if (currentDay != cachedDay) or (int(currentDay["time"]) - int(cachedForecast["time"]) > 86400):
+            cachedDay = int(time.strftime('%d', time.localtime(cachedForecast["time"][0])))
+            if (currentDay != cachedDay) or (int(currentDay["time"]) - int(cachedForecast["time"][0]) > 86400):
                 # Present day is not the same calendar day as cached day, or interval between current and
                 # cached is more than one day to account for sitting off for exactly one month.
                 print("Today's forcast is out of date. Updating now")
@@ -98,11 +98,11 @@ class WeatherManagerClass:
                 forecastFid.close()
         else:
             weather["current"] = False
-            weather["temperature_max"] = cachedForecast["temperature_2m_max"]
-            weather["temperature_min"] = cachedForecast["temperature_2m_min"]
-            weather["apparent_temperature_max"] = cachedForecast["apparent_temperature_max"]
-            weather["apparent_temperature_min"] = cachedForecast["apparent_temperature_min"]
-            weather["weathercode"] = cachedForecast["weather_code"]
+            weather["temperature_max"] = cachedForecast["temperature_2m_max"][0]
+            weather["temperature_min"] = cachedForecast["temperature_2m_min"][0]
+            weather["apparent_temperature_max"] = cachedForecast["apparent_temperature_max"][0]
+            weather["apparent_temperature_min"] = cachedForecast["apparent_temperature_min"][0]
+            weather["weathercode"] = cachedForecast["weather_code"][0]
         return weather
 
 
