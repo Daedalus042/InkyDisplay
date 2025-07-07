@@ -189,7 +189,7 @@ class WeatherManagerClass:
             weathercode = weather["weathercode"]
 
             draw.text((83, 43), "T", self.display.WHITE, font=font)
-            draw.text((123, 43), "{} | {}°C".format(high, low), self.display.WHITE if high < self.WARNING_TEMP else self.display.RED, font=font)
+            draw.text((103, 43), "{} | {}°C".format(high, low), self.display.WHITE if high < self.WARNING_TEMP else self.display.RED, font=font)
 
             draw.text((80, 72), "F", self.display.WHITE, font=font)
             draw.text((103, 72), "{} | {}°C".format(feelsLikeHigh, feelsLikeLow), self.display.WHITE, font=font)
