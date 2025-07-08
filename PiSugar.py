@@ -1,6 +1,7 @@
 import smbus
 import time
 import os
+import math
 from enum import Enum
 
 # Import dependancies
@@ -52,6 +53,11 @@ class PiSugarClass:
             time.sleep(0.05)
         print(samples)
 
+    def getBatteryBytes(self):
+        lowerByte = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.BatteryLower.value)
+        upperByte = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.BatteryUpper.value)
+        return (upperByte << 8) + lowerByte
+
     def getBatteryVoltage(self):
         samples = []
         for i in range(0,10):
@@ -66,7 +72,7 @@ class PiSugarClass:
         samples = []
         for i in range(0,10):
            samples.append(self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.EnergyLevel.value))
-           time.sleep(0.05)
+           time.sleep(0.1)
         return sum(samples) / len(samples)
 
     def getBatteryPerc(self):
@@ -76,8 +82,19 @@ class PiSugarClass:
         Shutdown voltage: ~ 3.0 V
         Max Voltage:      ~ 4.2? V
         ergo Battery range ~ 1.2 V from min to max
+
+        Current way to determine the battery percentage uses the following peacewise functions
+        for x <= 3.7: f(x)=150^(x-4.07)
+        for 3.7 < x <= 3.775: f(x)=20^(14x-53.3)+0.15
+        for 3.775 < x: -20^(-x+3.7)+1.2
         """
-        return (((self.getBatteryVoltage() - 3.0) / 1.2) * 100.0)
+        voltage = self.getBatteryVoltage()
+        if voltage <= 3.7:
+            return 150^(voltage-4.07)
+        elif voltage <= 3.775:
+            return 20^(14*voltage-53.3)+0.15
+        else:
+            return -(20^(-voltage+3.7))+1.2
 
     def isSuppliedPower(self):
         PowerCtrlReg = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.PowerCtrl.value)
