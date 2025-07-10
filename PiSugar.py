@@ -63,7 +63,7 @@ class PiSugarClass:
         for i in range(0,10):
             lowerByte = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.BatteryLower.value)
             upperByte = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.BatteryUpper.value)
-            samples.append(((upperByte << 8) + lowerByte) / 1000.0)
+            samples.append(((upperByte << 8) + lowerByte) / 1007.0)
             time.sleep(0.05)
         avg = sum(samples) / len(samples)
         return avg
@@ -90,11 +90,11 @@ class PiSugarClass:
         """
         voltage = self.getBatteryVoltage()
         if voltage <= 3.7:
-            return 150^(voltage-4.07)
+            return 100*150**(voltage-4.07)
         elif voltage <= 3.775:
-            return 20^(14*voltage-53.3)+0.15
+            return 100*(20**(14*voltage-53.3)+0.15)
         else:
-            return -(20^(-voltage+3.7))+1.2
+            return 100*(-(20**(-voltage+3.7))+1.2)
 
     def isSuppliedPower(self):
         PowerCtrlReg = self._i2cBus.read_byte_data(self.ADDRESS, self._registerMap.PowerCtrl.value)
